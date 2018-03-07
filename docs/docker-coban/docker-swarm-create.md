@@ -13,6 +13,7 @@ ____
 - [6.6 Scale service](#scale-service)
 - [6.7 Drain node](#drain-node)
 - [6.8 Định tuyến trong Docker Swarm](#routing-mesh)
+- [6.9 Dựng Docker Swarm Visualizer để theo dõi services](#docker-swarm-visualizer)
 - [Các nội dung khác](#content-others)
 
 ____
@@ -20,6 +21,10 @@ ____
 # <a name="content">Nội dung</a>
 
 - ### <a name="requirement">6.1 Các yêu cầu cần có để thực hiện</a>
+
+    - Mô hình đơn giản như sau:
+
+    > ![docker-swarm-sample-model.png](../../images/docker-swarm-sample-model.png)
 
     - Việc thực hiện cấu hình sử dụng ít nhất 3 node lần lượt đáp ứng yêu cầu theo bảng sau:
 
@@ -39,7 +44,7 @@ ____
         |  2  | 7946 |  tcp/udp  | for communication among nodes         |
         |  3  | 4789 |    tcp    | for overlay network traffic           |
         
-    - Để thực hiện pushlish các port trên CentOS ta có thể chạy các câu lệnh sau:
+    - Để thực hiện publish các port trên CentOS ta có thể chạy các câu lệnh sau:
 
             firewall-cmd --add-port=2377/tcp --permanent
             firewall-cmd --add-port=7946/tcp --permanent
@@ -48,7 +53,8 @@ ____
 
             firewall-cmd --reload
         
-
+    - Việc thực hiện được tiến hành sử dụng ảo hóa VMWare.
+    
 - ### <a name="swarm-init">6.2 Tạo ra Swarm Docker</a>
 
     - Thực hiện chạy câu lệnh sau trên node `dockers` để khởi tạo Swarm:
@@ -149,12 +155,12 @@ ____
 
         trong đó:
 
-            | Chỉ dẫn | Mô tả |
-            | ------------- | ------------- |
-            | docker service create | Câu lệnh để tạo ra một service |
-            | --name | flag khai báo tên của service. Ở đây là docker-nginx |
-            | --replicas | flag khai báo số lượng mong muốn của service chạy là 1 |
-            | --publish | flag khai báo publish port |
+        | Chỉ dẫn | Mô tả |
+        | ------------- | ------------- |
+        | docker service create | Câu lệnh để tạo ra một service |
+        | --name | flag khai báo tên của service. Ở đây là docker-nginx |
+        | --replicas | flag khai báo số lượng mong muốn của service chạy là 1 |
+        | --publish | flag khai báo publish port |
 
     - Để kiểm tra kết quả, ta sử dụng câu lệnh sau trên node `dockers`:
 
@@ -251,6 +257,23 @@ ____
 
     Như vậy, ta có thể truy cập tới service theo bất kỳ địa chỉ IP của node nào.
 
+
+- ### <a name="docker-swarm-visualizer">6.9 Dựng Docker Swarm Visualizer để theo dõi service</a>
+
+    - Khi sử dụng Docker Swarm, ta nên cài đặt thêm `Swarm Visualizer` để dễ dàng theo dõi các services có trong `Swarm Cluster`. Để thực hiện cài đặt, ta sử dụng câu lệnh:
+
+            docker service create \
+            --name=viz \
+            --publish=8080:8080/tcp \
+            --constraint=node.role==manager \
+            --mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
+            dockersamples/visualizer
+
+    - Sau khi chạy xong, ta có thể truy cập đến đường dẫn với port `ip_address:8080` để kiểm tra kết quả. Nếu cài đặt thành công, kết quả sẽ hiển thị tương tự như sau:
+
+        ![docker-visualizer.png](../../images/docker-visualizer.png)
+
+        
 # Tài liệu tham khảo
 
 - https://docs.docker.com/engine/swarm/swarm-tutorial/
